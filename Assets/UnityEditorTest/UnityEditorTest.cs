@@ -25,30 +25,78 @@ public class UnityEditorTest : EditorWindow
     /// <summary>
     /// アセットパス
     /// </summary>
-    private const string ASSET_PATH = "Assets/Resources/ScriptableObjectSample.asset";
+    private string ASSET_PATH = "Assets/UnityEditorTest/Resources/ScriptableTest.asset";
 
 
     private void OnGUI()
     {
-        EditorGUILayout.LabelField("Project Settings", EditorStyles.boldLabel);
-        using (new GUILayout.HorizontalScope())
+        Color defaultColor = GUI.backgroundColor;
+        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
         {
-
-        }
-        using (new GUILayout.HorizontalScope())
-        {
-            // 書き込みボタン
-            if (GUILayout.Button("書き込み"))
+            GUI.backgroundColor = Color.gray;
+            using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
             {
-                Export();
+                GUILayout.Label("設定");
+            }
+            GUI.backgroundColor = defaultColor;
+
+            _sample.SampleIntValue = EditorGUILayout.IntField("サンプル", _sample.SampleIntValue);
+        }
+        using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+        {
+            GUI.backgroundColor = Color.gray;
+            using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
+            {
+                GUILayout.Label("ファイル操作");
+            }
+            GUI.backgroundColor = defaultColor;
+
+            //GUILayout.Label("パス：" + ASSET_PATH);
+            ASSET_PATH = EditorGUILayout.TextField("パス", ASSET_PATH);
+
+            using (new GUILayout.HorizontalScope(GUI.skin.box))
+            {
+                // 読み込みボタン
+                if (GUILayout.Button("読み込み"))
+                {
+                    Import();
+                }
+                // 書き込みボタン
+                if (GUILayout.Button("書き込み"))
+                {
+                    Export();
+                }
             }
         }
     }
 
+    private void Import()
+    {
+        if (_sample == null)
+        {
+            _sample = ScriptableObject.CreateInstance<ScriptableTest>();
+        }
+
+        ScriptableTest sample = AssetDatabase.LoadAssetAtPath<ScriptableTest>(ASSET_PATH);
+        if (sample == null)
+            return;
+
+        // コピーする
+        //_sample.Copy(sample);
+        EditorUtility.CopySerialized(sample, _sample);
+    }
+
     private void Export()
     {
+        // 読み込み
+        ScriptableTest sample = AssetDatabase.LoadAssetAtPath<ScriptableTest>(ASSET_PATH);
+        if (sample == null)
+        {
+            sample = ScriptableObject.CreateInstance<ScriptableTest>();
+        }
+
         // 新規の場合は作成
-        if (!AssetDatabase.Contains(_sample as UnityEngine.Object))
+        if (!AssetDatabase.Contains(sample as UnityEngine.Object))
         {
             string directory = Path.GetDirectoryName(ASSET_PATH);
             if (!Directory.Exists(directory))
@@ -56,12 +104,16 @@ public class UnityEditorTest : EditorWindow
                 Directory.CreateDirectory(directory);
             }
             // アセット作成
-            AssetDatabase.CreateAsset(_sample, ASSET_PATH);
+            AssetDatabase.CreateAsset(sample, ASSET_PATH);
         }
-        // インスペクターから設定できないようにする
-        _sample.hideFlags = HideFlags.NotEditable;
+
+        // コピー
+        //sample.Copy(_sample);
+        EditorUtility.CopySerialized(_sample, sample);
+        // 直接編集できないようにする
+        sample.hideFlags = HideFlags.NotEditable;
         // 更新通知
-        EditorUtility.SetDirty(_sample);
+        EditorUtility.SetDirty(sample);
         // 保存
         AssetDatabase.SaveAssets();
         // エディタを最新の状態にする
