@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e6e2ab4515fe1c4f8f361bd49e58e40, type: 3}
   m_Name: ScriptableTest
   m_EditorClassIdentifier: 
-  _sampleIntValue: 5
+  _sampleIntValue: 3
