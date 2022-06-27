@@ -40,7 +40,7 @@ public class CSVReader : MonoBehaviour
                 );
                 break;
 
-            case UnityWebRequest.Result.DataProcessingError:
+            case UnityWebRequest.Result.DataProcessingError:                          
                 Debug.Log
                 (
                     @"データの処理中にエラーが発生。
